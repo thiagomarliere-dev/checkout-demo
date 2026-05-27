@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yunique Fashion Store — Checkout</title>
+  <script src="https://sdk-web.y.uno/v1.5/main.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #f5f5f5;
+      --white:      #ffffff;
+      --border:     #e8e8e8;
+      --text:       #1a1a1a;
+      --text-mid:   #444444;
+      --text-muted: #888888;
+      --btn:        #1a1a1a;
+      --btn-text:   #ffffff;
+      --green:      #007a3e;
+      --red:        #c0392b;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      height: 60px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      text-decoration: none;
+      font-style: italic;
+    }
+
+    .header-secure {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .header-secure svg { flex-shrink: 0; }
+
+    /* ── Breadcrumb ── */
+    .breadcrumb-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+    }
+
+    .breadcrumb-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .bc-step {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .bc-step.active {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .bc-sep {
+      font-size: 12px;
+      color: #cccccc;
+    }
+
+    /* ── Page wrapper ── */
+    .page-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    /* ── Two-column grid ── */
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* ── Card base ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      margin-bottom: 12px;
+    }
+
+    .card:last-child { margin-bottom: 0; }
+
+    .card-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text);
+    }
+
+    .card-body { padding: 20px; }
+
+    /* ── Item Summary ── */
+    .product-row {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .product-img {
+      flex-shrink: 0;
+      width: 90px;
+      height: 112px;
+      background: #f0ece7;
+      border-radius: 2px;
+      border: 1px solid #e4ddd6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .product-info { flex: 1; min-width: 0; }
+
+    .product-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .product-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      line-height: 1.8;
+    }
+
+    .product-sku {
+      font-size: 11px;
+      color: #bbbbbb;
+      letter-spacing: 0.03em;
+    }
+
+    .product-price {
+      flex-shrink: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    /* ── Payment form ── */
+    .field-wrap { margin-bottom: 16px; }
+
+    .field-wrap:last-of-type { margin-bottom: 0; }
+
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-mid);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .field-input {
+      width: 100%;
+      height: 44px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-family: var(--font);
+      font-size: 14px;
+      color: var(--text);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .field-input:focus { border-color: var(--text); }
+    .field-input::placeholder { color: #cccccc; }
+    .field-input:disabled { background: #fafafa; color: var(--text-muted); cursor: not-allowed; }
+
+    .form-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    /* Loading state */
+    .loading-state {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 32px 0;
+    }
+
+    .loading-state.visible { display: flex; }
+
+    .loading-ring {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--text);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Yuno SDK renders here */
+    #checkout-container { width: 100%; }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      height: 48px;
+      background: var(--btn);
+      color: var(--btn-text);
+      border: none;
+      border-radius: 2px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background 0.15s, opacity 0.15s, transform 0.1s;
+      margin-top: 20px;
+    }
+
+    .btn-primary:hover:not(:disabled) { background: #333333; }
+    .btn-primary:active:not(:disabled) { transform: scale(0.99); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    /* Message */
+    #message {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 2px;
+      font-size: 13px;
+      line-height: 1.5;
+      display: none;
+    }
+
+    #message.success {
+      background: #f0fff5;
+      color: var(--green);
+      border: 1px solid #b7e8ca;
+      display: block;
+    }
+
+    #message.error {
+      background: #fff5f5;
+      color: var(--red);
+      border: 1px solid #f5c6c6;
+      display: block;
+    }
+
+    /* ── Order Summary (right sidebar) ── */
+    .order-summary-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: default;
+      user-select: none;
+    }
+
+    /* chevron only visible on mobile */
+    .chevron-icon { display: none; }
+
+    .order-summary-body { padding: 16px 20px; }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .price-row:last-child { margin-bottom: 0; }
+
+    .price-row span:first-child { color: var(--text-mid); }
+    .price-row span:last-child  { color: var(--text); font-weight: 500; }
+
+    .price-row .free { color: var(--green); font-weight: 600; }
+
+    .price-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 14px;
+      margin-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    /* ── We Accept ── */
+    .we-accept-body {
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pay-icon {
+      width: 44px;
+      height: 28px;
+      border-radius: 4px;
+      border: 1px solid #e0e0e0;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    /* ── Footer ── */
+    .site-footer {
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      padding: 16px 24px;
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+
+    .footer-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── Mobile summary price preview (hidden on desktop) ── */
+    .summary-price-preview { display: none; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .site-header { padding: 0 16px; }
+
+      .brand-name { font-size: 18px; }
+
+      .breadcrumb-bar { padding: 8px 16px; }
+
+      .page-wrapper { padding: 12px 12px 40px; }
+
+      .checkout-grid {
+        grid-template-columns: 1fr;
+      }
+
+      /* Sidebar moves above main on mobile */
+      .col-sidebar { order: -1; }
+
+      /* Order summary: collapsible on mobile */
+      .order-summary-header {
+        cursor: pointer;
+      }
+
+      .chevron-icon {
+        display: block;
+        transition: transform 0.2s;
+        flex-shrink: 0;
+      }
+
+      .order-summary-header.expanded .chevron-icon {
+        transform: rotate(180deg);
+      }
+
+      .summary-price-preview {
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+        margin-right: 4px;
+      }
+
+      .order-summary-body {
+        display: none;
+      }
+
+      .order-summary-body.expanded {
+        display: block;
+      }
+
+      /* We Accept card hidden on mobile to keep it lean */
+      .we-accept-card { display: none; }
+
+      .card-body { padding: 16px; }
+      .card-header { padding: 12px 16px; }
+
+      .product-img { width: 72px; height: 90px; }
+      .product-name { font-size: 14px; }
+      .product-price { font-size: 15px; }
+
+      .field-input { font-size: 16px; } /* prevents iOS auto-zoom on focus */
+
+      .btn-primary { height: 50px; margin-top: 16px; }
+
+      .footer-inner { gap: 16px; }
+    }
+
+    @media (max-width: 380px) {
+      .product-row { gap: 12px; }
+      .product-img { width: 60px; height: 76px; }
+      .product-meta { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="site-header">
+    <a class="brand-name" href="#">Yunique</a>
+    <div class="header-secure">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      Secure Checkout
+    </div>
+    <div></div><!-- right spacer to keep header-secure centered -->
+  </header>
+
+  <!-- ── Breadcrumb ── -->
+  <nav class="breadcrumb-bar" aria-label="Checkout steps">
+    <div class="breadcrumb-inner">
+      <span class="bc-step">Shopping Bag</span>
+      <span class="bc-sep">›</span>
+      <span class="bc-step">Place Order</span>
+      <span class="bc-sep">›</span>
+      <span class="bc-step active">Pay</span>
+      <span class="bc-sep">›</span>
+      <span class="bc-step">Order Complete</span>
+    </div>
+  </nav>
+
+  <!-- ── Page content ── -->
+  <div class="page-wrapper">
+    <div class="checkout-grid">
+
+      <!-- ── Left column (70%) ── -->
+      <div class="col-main">
+
+        <!-- Item Summary -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Item Summary</span>
+          </div>
+          <div class="card-body">
+            <div class="product-row">
+
+              <!-- Product image -->
+              <div class="product-img">
+                <svg width="52" height="68" viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M50 20 L32 44 L8 36 L6 104 L94 104 L92 36 L68 44 Z"
+                        fill="#E5DDD5" stroke="#C0B5A8" stroke-width="1.8" stroke-linejoin="round"/>
+                  <path d="M50 20 L38 40 L32 44"
+                        fill="#D8CFCA" stroke="#B0A49A" stroke-width="1.8" stroke-linejoin="round"/>
+                  <path d="M50 20 L62 40 L68 44"
+                        fill="#D8CFCA" stroke="#B0A49A" stroke-width="1.8" stroke-linejoin="round"/>
+                  <line x1="50" y1="44" x2="50" y2="102" stroke="#C8BEB5" stroke-width="1.2"/>
+                  <path d="M20 62 L38 62 L38 66 L20 66 Z" fill="#D8CFCA" stroke="#B0A49A" stroke-width="1"/>
+                  <path d="M62 62 L80 62 L80 66 L62 66 Z" fill="#D8CFCA" stroke="#B0A49A" stroke-width="1"/>
+                  <circle cx="50" cy="60" r="2.5" fill="#C0B5A8" stroke="#A8A09A" stroke-width="0.8"/>
+                  <circle cx="50" cy="74" r="2.5" fill="#C0B5A8" stroke="#A8A09A" stroke-width="0.8"/>
+                  <circle cx="50" cy="88" r="2.5" fill="#C0B5A8" stroke="#A8A09A" stroke-width="0.8"/>
+                </svg>
+              </div>
+
+              <!-- Product info -->
+              <div class="product-info">
+                <div class="product-name">Oversized Wool Blazer</div>
+                <div class="product-meta">
+                  <div>Size: M</div>
+                  <div>Color: Pearl</div>
+                  <div>Qty: 1</div>
+                </div>
+                <div class="product-sku">Ref: YFS-2025-OWB</div>
+              </div>
+
+              <!-- Price -->
+              <div class="product-price">R$ 1.000,00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Payment Information</span>
+          </div>
+          <div class="card-body">
+
+            <!-- Full Name -->
+            <div class="field-wrap">
+              <label class="field-label" for="customer-name">Full Name</label>
+              <input
+                class="field-input"
+                type="text"
+                id="customer-name"
+                placeholder="Jane Smith"
+                autocomplete="name"
+              />
+            </div>
+
+            <div class="form-divider"></div>
+
+            <!-- Loading state (while SDK initializes) -->
+            <div class="loading-state" id="loading-state">
+              <div class="loading-ring"></div>
+              <span class="loading-label" id="loading-label">Preparing your checkout…</span>
+            </div>
+
+            <!-- Yuno SDK mounts here -->
+            <div id="checkout-container"></div>
+
+            <!-- Action buttons -->
+            <button class="btn-primary" id="pay-btn">Complete Purchase</button>
+            <button class="btn-primary" id="confirm-btn" style="display:none">Confirm Payment</button>
+
+            <div id="message"></div>
+
+          </div>
+        </div>
+
+      </div><!-- /col-main -->
+
+      <!-- ── Right column (30%) ── -->
+      <aside class="col-sidebar">
+
+        <!-- Order Summary (collapsible on mobile) -->
+        <div class="card">
+          <div class="order-summary-header" id="order-summary-toggle">
+            <span class="card-title">Order Summary</span>
+            <span class="summary-price-preview">R$ 1.000,00</span>
+            <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="order-summary-body" id="order-summary-body">
+            <div class="price-row">
+              <span>Subtotal (1 item)</span>
+              <span>R$ 1.000,00</span>
+            </div>
+            <div class="price-row">
+              <span>Shipping</span>
+              <span class="free">Free</span>
+            </div>
+            <div class="price-total-row">
+              <span>Total</span>
+              <span>R$ 1.000,00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- We Accept -->
+        <div class="card we-accept-card">
+          <div class="card-header">
+            <span class="card-title">We Accept</span>
+          </div>
+          <div class="we-accept-body">
+
+            <!-- Visa -->
+            <div class="pay-icon">
+              <svg width="44" height="28" viewBox="0 0 44 28" xmlns="http://www.w3.org/2000/svg">
+                <rect width="44" height="28" rx="4" fill="#1A1F71"/>
+                <text x="22" y="19" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="12" font-weight="bold" font-style="italic">VISA</text>
+              </svg>
+            </div>
+
+            <!-- Mastercard -->
+            <div class="pay-icon">
+              <svg width="44" height="28" viewBox="0 0 44 28" xmlns="http://www.w3.org/2000/svg">
+                <rect width="44" height="28" rx="4" fill="#1A1A1A"/>
+                <circle cx="17" cy="14" r="8" fill="#EB001B"/>
+                <circle cx="27" cy="14" r="8" fill="#F79E1B"/>
+                <path d="M22 7.9a8 8 0 0 1 0 12.2A8 8 0 0 1 22 7.9z" fill="#FF5F00"/>
+              </svg>
+            </div>
+
+            <!-- Amex -->
+            <div class="pay-icon">
+              <svg width="44" height="28" viewBox="0 0 44 28" xmlns="http://www.w3.org/2000/svg">
+                <rect width="44" height="28" rx="4" fill="#016FD0"/>
+                <text x="22" y="13" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="7" font-weight="bold" letter-spacing="0.3">AMERICAN</text>
+                <text x="22" y="22" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="7" font-weight="bold" letter-spacing="0.3">EXPRESS</text>
+              </svg>
+            </div>
+
+          </div>
+        </div>
+
+      </aside><!-- /col-sidebar -->
+
+    </div><!-- /checkout-grid -->
+  </div><!-- /page-wrapper -->
+
+  <!-- ── Footer ── -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-item">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        SSL Encrypted
+      </div>
+      <div class="footer-item">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        Secure Payment
+      </div>
+      <div class="footer-item">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Money-back Guarantee
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const PUBLIC_API_KEY = "sandbox_gAAAAABmaGCZVfUZxTWtADsJzCAxbL4Z0EW6s9qdIkSMCYAwE0xZzbFObZTFa9nSS3bJmKZYHvbCP72ERpEM4rj6pa1BKI-daDHHHS1wSVbltMJof9yNgFUeB4ZJacGK_j5KC49rpreonirM5YBEm6daxiZf9SPANmYD3cOdYlVwDJi6qmFXDu3iGHYECqeApLIHmd11K2pzVjjl7x3TBCEjF4d_2P2kagM12MYGrbbeEhweKFUABnENy5FCrCqkF65WmZY7xELh";
+    const PRODUCT_AMOUNT = 1000;
+
+    let yunoInstance = null;
+
+    const payBtn      = document.getElementById("pay-btn");
+    const confirmBtn  = document.getElementById("confirm-btn");
+    const messageEl   = document.getElementById("message");
+    const loadingState = document.getElementById("loading-state");
+    const loadingLabel = document.getElementById("loading-label");
+
+    function showMessage(text, type) {
+      messageEl.textContent = text;
+      messageEl.className = type;
+    }
+
+    function clearMessage() {
+      messageEl.textContent = "";
+      messageEl.className = "";
+    }
+
+    function setLoading(btn, loading, label) {
+      btn.disabled = loading;
+      btn.innerHTML = loading
+        ? `<span class="btn-spinner"></span>${label}`
+        : label;
+    }
+
+    function showLoadingState(text) {
+      loadingLabel.textContent = text;
+      loadingState.classList.add("visible");
+    }
+
+    function hideLoadingState() {
+      loadingState.classList.remove("visible");
+    }
+
+    async function post(url, body) {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error?.message || JSON.stringify(data.error) || "Unknown error");
+      }
+      return data;
+    }
+
+    async function handlePay() {
+      clearMessage();
+
+      const name = document.getElementById("customer-name").value.trim();
+      if (!name) return showMessage("Please enter your full name.", "error");
+
+      try {
+        setLoading(payBtn, true, "Processing…");
+        showLoadingState("Creating your profile…");
+
+        const { customer_id } = await post("/api/customer", { name });
+
+        showLoadingState("Preparing payment session…");
+        const { checkout_session } = await post("/api/checkout-session", {
+          customer_id,
+          amount: PRODUCT_AMOUNT,
+        });
+
+        showLoadingState("Loading payment options…");
+        yunoInstance = await window.Yuno.initialize(PUBLIC_API_KEY);
+
+        await yunoInstance.startCheckout({
+          checkoutSession: checkout_session,
+          elementSelector: '#checkout-container',
+          countryCode: 'BR',
+          language: 'en',
+          showLoading: true,
+          showPaymentStatus: true,
+
+          async yunoCreatePayment(oneTimeToken) {
+            console.log('[Yuno] yunoCreatePayment →', oneTimeToken);
+            try {
+              const result = await post("/api/payment", {
+                checkout_session,
+                one_time_token: oneTimeToken,
+                amount:         PRODUCT_AMOUNT,
+                customer_id,
+              });
+              console.log('[Yuno] payment created →', result);
+            } catch (err) {
+              console.error('[Yuno] payment creation error:', err);
+              showMessage(`Payment error: ${err.message}`, 'error');
+            } finally {
+              await yunoInstance.continuePayment({ showPaymentStatus: true });
+            }
+          },
+
+          yunoPaymentResult(data) {
+            console.log('[Yuno] payment result →', data);
+            const status = (data?.status || data?.payment_workflow_status || data || '').toString().toUpperCase();
+            if (['APPROVED', 'SUCCEEDED', 'CAPTURED'].includes(status)) {
+              showMessage('Payment approved! Thank you for your purchase.', 'success');
+              document.getElementById('checkout-container').innerHTML = '';
+              confirmBtn.style.display = 'none';
+            } else {
+              showMessage(`Payment failed (${status || 'unknown'}). Please try again.`, 'error');
+              setLoading(confirmBtn, false, 'Confirm Payment');
+            }
+          },
+
+          yunoError(msg, data) {
+            console.error('[Yuno] error:', msg, data);
+            showMessage('An error occurred. Please try again.', 'error');
+            setLoading(confirmBtn, false, 'Confirm Payment');
+          },
+        });
+
+        await yunoInstance.mountCheckout();
+
+        hideLoadingState();
+        payBtn.style.display = 'none';
+        confirmBtn.style.display = 'flex';
+        setLoading(confirmBtn, false, 'Confirm Payment');
+        document.getElementById('customer-name').disabled = true;
+
+      } catch (err) {
+        hideLoadingState();
+        showMessage(`Error: ${err.message}`, 'error');
+        setLoading(payBtn, false, 'Complete Purchase');
+      }
+    }
+
+    payBtn.addEventListener('click', handlePay);
+
+    confirmBtn.addEventListener('click', async () => {
+      try {
+        setLoading(confirmBtn, true, 'Processing payment…');
+        await yunoInstance.startPayment();
+      } catch (err) {
+        console.error('[Yuno] startPayment error:', err);
+        showMessage('An error occurred. Please try again.', 'error');
+        setLoading(confirmBtn, false, 'Confirm Payment');
+      }
+    });
+
+    // Mobile: toggle Order Summary collapse
+    const orderToggle = document.getElementById("order-summary-toggle");
+    const orderBody   = document.getElementById("order-summary-body");
+
+    orderToggle.addEventListener("click", () => {
+      if (window.innerWidth <= 768) {
+        orderBody.classList.toggle("expanded");
+        orderToggle.classList.toggle("expanded");
+      }
+    });
+  </script>
+</body>
+</html>
