@@ -261,6 +261,8 @@
     /* Yuno SDK renders here */
     #checkout-container { width: 100%; }
 
+    .yuno-grid-email { display: none !important; }
+
     /* ── Buttons ── */
     .btn-primary {
       display: flex;
@@ -699,6 +701,18 @@
 
     let yunoInstance = null;
 
+    // Auto-fill the hidden email field when the Yuno SDK renders it
+    const emailObserver = new MutationObserver(() => {
+      const emailInput = document.querySelector('.yuno-grid-email input');
+      if (!emailInput || emailInput.dataset.filled) return;
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+      setter.call(emailInput, 'pagamento@yunique.com');
+      emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+      emailInput.dispatchEvent(new Event('change', { bubbles: true }));
+      emailInput.dataset.filled = '1';
+    });
+    emailObserver.observe(document.body, { childList: true, subtree: true });
+
     const payBtn      = document.getElementById("pay-btn");
     const confirmBtn  = document.getElementById("confirm-btn");
     const messageEl   = document.getElementById("message");
@@ -772,6 +786,10 @@
           language: 'en',
           showLoading: true,
           showPaymentStatus: true,
+          renderMode: {
+            type: 'element',
+            elementSelector: '#checkout-container',
+          },
 
           async yunoCreatePayment(oneTimeToken) {
             console.log('[Yuno] yunoCreatePayment →', oneTimeToken);
