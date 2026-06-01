@@ -833,9 +833,21 @@
 
         hideLoadingState();
         payBtn.style.display = 'none';
-        confirmBtn.style.display = 'flex';
-        setLoading(confirmBtn, false, 'Confirm Payment');
         document.getElementById('customer-name').disabled = true;
+
+        // Abre o formulário do cartão ao clicar na opção Card
+        let formOpened = false;
+        document.getElementById('checkout-container').addEventListener('click', (e) => {
+          if (formOpened) return;
+          if (e.target.closest('.yuno-payment-list__radio-card, .Yuno-radio-button__container')) {
+            formOpened = true;
+            yunoInstance.startPayment().catch(err => {
+              console.error('[Yuno] startPayment error:', err);
+              showMessage('An error occurred. Please try again.', 'error');
+              formOpened = false;
+            });
+          }
+        });
 
       } catch (err) {
         hideLoadingState();
@@ -845,17 +857,6 @@
     }
 
     payBtn.addEventListener('click', handlePay);
-
-    confirmBtn.addEventListener('click', async () => {
-      try {
-        setLoading(confirmBtn, true, 'Processing payment…');
-        await yunoInstance.startPayment();
-      } catch (err) {
-        console.error('[Yuno] startPayment error:', err);
-        showMessage('An error occurred. Please try again.', 'error');
-        setLoading(confirmBtn, false, 'Confirm Payment');
-      }
-    });
 
     // Mobile: toggle Order Summary collapse
     const orderToggle = document.getElementById("order-summary-toggle");
